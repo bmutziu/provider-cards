@@ -22,8 +22,8 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
-	"github.com/crossplane/provider-template/internal/controller/config"
-	"github.com/crossplane/provider-template/internal/controller/mytype"
+	Card "github.com/aaronme/provider-cards/internal/controller/card"
+	"github.com/aaronme/provider-cards/internal/controller/config"
 )
 
 // Setup creates all Template controllers with the supplied logger and adds them to
@@ -31,7 +31,7 @@ import (
 func Setup(mgr ctrl.Manager, l logging.Logger, wl workqueue.RateLimiter) error {
 	for _, setup := range []func(ctrl.Manager, logging.Logger, workqueue.RateLimiter) error{
 		config.Setup,
-		mytype.Setup,
+		Card.Setup,
 	} {
 		if err := setup(mgr, l, wl); err != nil {
 			return err

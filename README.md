@@ -1,21 +1,21 @@
-# provider-template
+# provider-cards
 
-`provider-template` is a minimal [Crossplane](https://crossplane.io/) Provider
-that is meant to be used as a template for implementing new Providers. It comes
-with the following features that are meant to be refactored:
+`provider-cards` is a [Crossplane](https://crossplane.io/) Provider for 
+generating Decks of Playing Cards. It comes with the following resources:
 
-- A `ProviderConfig` type that only points to a credentials `Secret`.
-- A `MyType` resource type that serves as an example managed resource.
-- A managed resource controller that reconciles `MyType` objects and simply
-  prints their configuration in its `Observe` method.
+- A `ProviderConfig` which is unique per-deck.
+- A `Card` resource type that represents a single playing-card.
+- A `Deck` resource type that represents a shuffled deck of 52 cards.
+- A managed resource controller for each of the above Resources and maintains
+  the state of the Deck in a Secret file in the crossplane namespace.
 
 ## Developing
 
 1. Use this repository as a template to create a new one.
-1. Find-and-replace `provider-template` with your provider's name.
+1. Find-and-replace `provider-cards` with your provider's name.
 1. Run `make` to initialize the "build" Make submodule we use for CI/CD.
 1. Run `make reviewable` to run code generation, linters, and tests.
-1. Replace `MyType` with your own managed resource implementation(s).
+1. Replace `Card` with your own managed resource implementation(s).
 
 Refer to Crossplane's [CONTRIBUTING.md] file for more information on how the
 Crossplane community prefers to work. The [Provider Development][provider-dev]

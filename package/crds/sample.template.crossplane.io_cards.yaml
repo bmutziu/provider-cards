@@ -6,7 +6,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.2
   creationTimestamp: null
-  name: mytypes.sample.template.crossplane.io
+  name: cards.sample.template.crossplane.io
 spec:
   group: sample.template.crossplane.io
   names:
@@ -14,10 +14,10 @@ spec:
     - crossplane
     - managed
     - template
-    kind: MyType
-    listKind: MyTypeList
-    plural: mytypes
-    singular: mytype
+    kind: Card
+    listKind: CardList
+    plural: cards
+    singular: card
   scope: Cluster
   versions:
   - additionalPrinterColumns:
@@ -36,7 +36,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A MyType is an example API type.
+        description: A Card is an example API type.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -51,7 +51,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: A MyTypeSpec defines the desired state of a MyType.
+            description: A CardSpec defines the desired state of a Card.
             properties:
               deletionPolicy:
                 default: Delete
@@ -63,12 +63,12 @@ spec:
                 - Delete
                 type: string
               forProvider:
-                description: MyTypeParameters are the configurable fields of a MyType.
+                description: CardParameters are the configurable fields of a Card.
                 properties:
-                  configurableField:
+                  rank:
                     type: string
-                required:
-                - configurableField
+                  suit:
+                    type: string
                 type: object
               providerConfigRef:
                 default:
@@ -115,10 +115,10 @@ spec:
             - forProvider
             type: object
           status:
-            description: A MyTypeStatus represents the observed state of a MyType.
+            description: A CardStatus represents the observed state of a Card.
             properties:
               atProvider:
-                description: MyTypeObservation are the observable fields of a MyType.
+                description: CardObservation are the observable fields of a Card.
                 properties:
                   observableField:
                     type: string

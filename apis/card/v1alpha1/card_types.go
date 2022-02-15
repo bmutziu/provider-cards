@@ -25,62 +25,63 @@ import (
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
-// MyTypeParameters are the configurable fields of a MyType.
-type MyTypeParameters struct {
-	ConfigurableField string `json:"configurableField"`
+// CardParameters are the configurable fields of a Card.
+type CardParameters struct {
+	Suit string `json:"suit,omitempty"`
+	Rank string `json:"rank,omitempty"`
 }
 
-// MyTypeObservation are the observable fields of a MyType.
-type MyTypeObservation struct {
+// CardObservation are the observable fields of a Card.
+type CardObservation struct {
 	ObservableField string `json:"observableField,omitempty"`
 }
 
-// A MyTypeSpec defines the desired state of a MyType.
-type MyTypeSpec struct {
+// A CardSpec defines the desired state of a Card.
+type CardSpec struct {
 	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       MyTypeParameters `json:"forProvider"`
+	ForProvider       CardParameters `json:"forProvider"`
 }
 
-// A MyTypeStatus represents the observed state of a MyType.
-type MyTypeStatus struct {
+// A CardStatus represents the observed state of a Card.
+type CardStatus struct {
 	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          MyTypeObservation `json:"atProvider,omitempty"`
+	AtProvider          CardObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// A MyType is an example API type.
+// A Card is an example API type.
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="EXTERNAL-NAME",type="string",JSONPath=".metadata.annotations.crossplane\\.io/external-name"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,template}
-type MyType struct {
+type Card struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   MyTypeSpec   `json:"spec"`
-	Status MyTypeStatus `json:"status,omitempty"`
+	Spec   CardSpec   `json:"spec"`
+	Status CardStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// MyTypeList contains a list of MyType
-type MyTypeList struct {
+// CardList contains a list of Card
+type CardList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []MyType `json:"items"`
+	Items           []Card `json:"items"`
 }
 
-// MyType type metadata.
+// Card type metadata.
 var (
-	MyTypeKind             = reflect.TypeOf(MyType{}).Name()
-	MyTypeGroupKind        = schema.GroupKind{Group: Group, Kind: MyTypeKind}.String()
-	MyTypeKindAPIVersion   = MyTypeKind + "." + SchemeGroupVersion.String()
-	MyTypeGroupVersionKind = SchemeGroupVersion.WithKind(MyTypeKind)
+	CardKind             = reflect.TypeOf(Card{}).Name()
+	CardGroupKind        = schema.GroupKind{Group: Group, Kind: CardKind}.String()
+	CardKindAPIVersion   = CardKind + "." + SchemeGroupVersion.String()
+	CardGroupVersionKind = SchemeGroupVersion.WithKind(CardKind)
 )
 
 func init() {
-	SchemeBuilder.Register(&MyType{}, &MyTypeList{})
+	SchemeBuilder.Register(&Card{}, &CardList{})
 }

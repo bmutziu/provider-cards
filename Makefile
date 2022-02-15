@@ -1,7 +1,7 @@
 # ====================================================================================
 # Setup Project
-PROJECT_NAME := provider-template
-PROJECT_REPO := github.com/crossplane/$(PROJECT_NAME)
+PROJECT_NAME := provider-cards
+PROJECT_REPO := github.com/aaronme/$(PROJECT_NAME)
 
 PLATFORMS ?= linux_amd64 linux_arm64
 -include build/makelib/common.mk
@@ -22,7 +22,7 @@ GO111MODULE = on
 -include build/makelib/k8s_tools.mk
 
 # Setup Images
-DOCKER_REGISTRY ?= crossplane
+DOCKER_REGISTRY ?= aaronme
 IMAGES = $(PROJECT_NAME) $(PROJECT_NAME)-controller
 -include build/makelib/image.mk
 
