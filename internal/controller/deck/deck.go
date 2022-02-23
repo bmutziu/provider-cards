@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package card
+package deck
 
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -29,17 +31,18 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	"github.com/aaronme/provider-cards/apis/card/v1alpha1"
+	"github.com/aaronme/provider-cards/apis/deck/v1alpha1"
 	deckv1alpha1 "github.com/aaronme/provider-cards/apis/deck/v1alpha1"
 	apisv1alpha1 "github.com/aaronme/provider-cards/apis/v1alpha1"
 )
 
 const (
-	errNotCard      = "managed resource is not a Card custom resource"
+	errNotDeck      = "managed resource is not a Deck custom resource"
 	errTrackPCUsage = "cannot track ProviderConfig usage"
 	errGetPC        = "cannot get ProviderConfig"
 	errGetCreds     = "cannot get credentials"
@@ -54,27 +57,28 @@ var (
 	newNoOpService = func(_ []byte) (interface{}, error) { return &NoOpService{}, nil }
 )
 
-// Setup adds a controller that reconciles Card managed resources.
+// Setup adds a controller that reconciles Deck managed resources.
 func Setup(mgr ctrl.Manager, l logging.Logger, rl workqueue.RateLimiter) error {
-	name := managed.ControllerName(v1alpha1.CardGroupKind)
+	name := managed.ControllerName(v1alpha1.DeckGroupKind)
 
 	o := controller.Options{
 		RateLimiter: ratelimiter.NewDefaultManagedRateLimiter(rl),
 	}
 
 	r := managed.NewReconciler(mgr,
-		resource.ManagedKind(v1alpha1.CardGroupVersionKind),
+		resource.ManagedKind(v1alpha1.DeckGroupVersionKind),
 		managed.WithExternalConnecter(&connector{
 			kube:         mgr.GetClient(),
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
 			newServiceFn: newNoOpService}),
+		// managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient()),),
 		managed.WithLogger(l.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))))
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o).
-		For(&v1alpha1.Card{}).
+		For(&v1alpha1.Deck{}).
 		Complete(r)
 }
 
@@ -92,9 +96,9 @@ type connector struct {
 // 3. Getting the credentials specified by the ProviderConfig.
 // 4. Using the credentials to form a client.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	cr, ok := mg.(*v1alpha1.Card)
+	cr, ok := mg.(*v1alpha1.Deck)
 	if !ok {
-		return nil, errors.New(errNotCard)
+		return nil, errors.New(errNotDeck)
 	}
 
 	if err := c.usage.Track(ctx, mg); err != nil {
@@ -129,16 +133,17 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*v1alpha1.Card)
+	cr, ok := mg.(*v1alpha1.Deck)
+	// 	cr.Status.AtProvider.Cards = newDeck()
 	if !ok {
-		return managed.ExternalObservation{}, errors.New(errNotCard)
+		return managed.ExternalObservation{}, errors.New(errNotDeck)
 	}
 
 	// These fmt statements should be removed in the real implementation.
-	fmt.Printf("Observing: **********\n")
-	fmt.Printf("Suit: %s\n", cr.Status.AtProvider.Suit)
-	fmt.Printf("Rank: %s\n", cr.Status.AtProvider.Rank)
-	fmt.Printf("End Observation: **********\n")
+	// if len(cr.Status.AtProvider.Cards) == 0 {
+	// 	cr.Status.AtProvider.Cards = newDeck()
+	// }
+	fmt.Printf("Observing: %+v", cr)
 
 	return managed.ExternalObservation{
 		// Return false when the external resource does not exist. This lets
@@ -158,19 +163,12 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*v1alpha1.Card)
+	cr, ok := mg.(*v1alpha1.Deck)
 	if !ok {
-		return managed.ExternalCreation{}, errors.New(errNotCard)
+		return managed.ExternalCreation{}, errors.New(errNotDeck)
 	}
 
-	deck := deckv1alpha1.Deck{}
-	err := c.client.Get(ctx, &deck).Name(cr.Spec.ForProvider.Deck)
-
-	if err != nil {
-		return managed.ExternalCreation{}, errors.New(errNotCard)
-	}
-
-	cr.Status.AtProvider = getTopCard(deck)
+	cr.Status.AtProvider.Cards = newDeck()
 
 	fmt.Printf("Creating: %+v", cr)
 
@@ -182,9 +180,9 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*v1alpha1.Card)
+	cr, ok := mg.(*v1alpha1.Deck)
 	if !ok {
-		return managed.ExternalUpdate{}, errors.New(errNotCard)
+		return managed.ExternalUpdate{}, errors.New(errNotDeck)
 	}
 
 	fmt.Printf("Updating: %+v", cr)
@@ -197,9 +195,9 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
-	cr, ok := mg.(*v1alpha1.Card)
+	cr, ok := mg.(*v1alpha1.Deck)
 	if !ok {
-		return errors.New(errNotCard)
+		return errors.New(errNotDeck)
 	}
 
 	fmt.Printf("Deleting: %+v", cr)
@@ -207,22 +205,52 @@ func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
 	return nil
 }
 
-// TODO(@AaronME)
-// need to pass deck pointer
-func getTopCard(deck deckv1alpha1.Deck) v1alpha1.CardObservation {
-	cardObservation := v1alpha1.CardStatus.CardObservation{}
+func getSuits() [4]string {
+	return [4]string{"♠", "♥", "♦", "♣"}
+}
 
-	// Capture all the cards in the Deck
-	allCards := deck.Status.AtProvider.Cards
+func getRanks() [13]string {
+	return [13]string{"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}
+}
 
-	// Pop the "top" card (the last card in the list)
-	topCard := allCards[len(allCards)-1]
+func newDeck() []deckv1alpha1.DeckCard {
+	cards := []deckv1alpha1.DeckCard{}
+	for _, suit := range getSuits() {
+		for _, rank := range getRanks() {
+			newCard := deckv1alpha1.DeckCard{
+				Suit: suit,
+				Rank: rank,
+			}
+			cards = append(cards, newCard)
+		}
+	}
 
-	// Put the rest of the cards back in the deck
-	deck.Status.AtProvider.Cards = allCards[:len(allCards)-1]
+	// We deliver the cards shuffled. This could change later, as every "real"
+	// deck comes from the factory in-order.
+	t := time.Now()
+	rand.Seed(int64(t.Nanosecond()))
+	for i := range cards {
+		j := rand.Intn(i + 1) //nolint:golint,gosec
+		cards[i], cards[j] = cards[j], cards[i]
+	}
 
-	cardObservation.Suit = topCard.Suit
-	cardObservation.Suit = topCard.Rank
+	return cards
+}
 
-	return cardObservation
+// AtProviderCards writes a deck to Status.AtProvider.Cards of a Deck managed
+// resource.
+type AtProviderCards struct{ client client.Client }
+
+// AtProviderCards returns a new NameAsExternalName.
+func AtProviderCards(c client.Client) *AtProviderCards {
+	return &AtProviderCards{client: c}
+}
+
+// Initialize the given managed resource.
+func (a *AtProviderCards) Initialize(ctx context.Context, mg deckv1alpha1.Deck) error {
+	if len(mg.Status.AtProvider.Cards) == 0 {
+		cr.Status.AtProvider.Cards = newDeck()
+	}
+	meta.SetExternalName(mg, mg.GetName())
+	return errors.Wrap(a.client.Update(ctx, mg), errUpdateManaged)
 }

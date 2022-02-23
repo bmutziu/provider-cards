@@ -24,6 +24,7 @@ import (
 
 	Card "github.com/aaronme/provider-cards/internal/controller/card"
 	"github.com/aaronme/provider-cards/internal/controller/config"
+	Deck "github.com/aaronme/provider-cards/internal/controller/deck"
 )
 
 // Setup creates all Template controllers with the supplied logger and adds them to
@@ -32,6 +33,7 @@ func Setup(mgr ctrl.Manager, l logging.Logger, wl workqueue.RateLimiter) error {
 	for _, setup := range []func(ctrl.Manager, logging.Logger, workqueue.RateLimiter) error{
 		config.Setup,
 		Card.Setup,
+		Deck.Setup,
 	} {
 		if err := setup(mgr, l, wl); err != nil {
 			return err

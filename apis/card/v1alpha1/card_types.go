@@ -27,13 +27,16 @@ import (
 
 // CardParameters are the configurable fields of a Card.
 type CardParameters struct {
-	Suit string `json:"suit,omitempty"`
-	Rank string `json:"rank,omitempty"`
+	// +crossplane:generate:reference:type=github.com/aaronme/provider-cards/apis/deck/v1alpha1.Deck
+	// +crossplane:generate:reference:refFieldName=DeckRef
+	// +crossplane:generate:reference:selectorFieldName=DeckSelector
+	Deck string `json:"deck"`
 }
 
 // CardObservation are the observable fields of a Card.
 type CardObservation struct {
-	ObservableField string `json:"observableField,omitempty"`
+	Suit string `json:"suit,omitempty"`
+	Rank string `json:"rank,omitempty"`
 }
 
 // A CardSpec defines the desired state of a Card.
@@ -53,7 +56,6 @@ type CardStatus struct {
 // A Card is an example API type.
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
-// +kubebuilder:printcolumn:name="EXTERNAL-NAME",type="string",JSONPath=".metadata.annotations.crossplane\\.io/external-name"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,template}

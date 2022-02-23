@@ -1,0 +1,20 @@
+# permissions for end users to view decks.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: deck-viewer-role
+rules:
+  - apiGroups:
+      - providercards.aaroneaton.com
+    resources:
+      - decks
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - providercards.aaroneaton.com
+    resources:
+      - decks/status
+    verbs:
+      - get

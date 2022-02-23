@@ -1,0 +1,24 @@
+# permissions for end users to edit decks.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: deck-editor-role
+rules:
+  - apiGroups:
+      - providercards.aaroneaton.com
+    resources:
+      - decks
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - providercards.aaroneaton.com
+    resources:
+      - decks/status
+    verbs:
+      - get

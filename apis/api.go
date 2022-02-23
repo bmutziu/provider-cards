@@ -20,7 +20,8 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	samplev1alpha1 "github.com/aaronme/provider-cards/apis/card/v1alpha1"
+	cardv1alpha1 "github.com/aaronme/provider-cards/apis/card/v1alpha1"
+	deckv1alpha1 "github.com/aaronme/provider-cards/apis/deck/v1alpha1"
 	apisv1alpha "github.com/aaronme/provider-cards/apis/v1alpha1"
 )
 
@@ -28,7 +29,8 @@ func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes,
 		apisv1alpha.SchemeBuilder.AddToScheme,
-		samplev1alpha1.SchemeBuilder.AddToScheme,
+		cardv1alpha1.SchemeBuilder.AddToScheme,
+		deckv1alpha1.SchemeBuilder.AddToScheme,
 	)
 }
 

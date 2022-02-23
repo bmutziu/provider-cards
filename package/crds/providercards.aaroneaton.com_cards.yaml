@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.2
   creationTimestamp: null
-  name: cards.sample.template.crossplane.io
+  name: cards.providercards.aaroneaton.com
 spec:
-  group: sample.template.crossplane.io
+  group: providercards.aaroneaton.com
   names:
     categories:
     - crossplane
@@ -26,9 +26,6 @@ spec:
       type: string
     - jsonPath: .status.conditions[?(@.type=='Synced')].status
       name: SYNCED
-      type: string
-    - jsonPath: .metadata.annotations.crossplane\.io/external-name
-      name: EXTERNAL-NAME
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: AGE
@@ -65,10 +62,10 @@ spec:
               forProvider:
                 description: CardParameters are the configurable fields of a Card.
                 properties:
-                  rank:
+                  deck:
                     type: string
-                  suit:
-                    type: string
+                required:
+                - deck
                 type: object
               providerConfigRef:
                 default:
@@ -120,7 +117,9 @@ spec:
               atProvider:
                 description: CardObservation are the observable fields of a Card.
                 properties:
-                  observableField:
+                  rank:
+                    type: string
+                  suit:
                     type: string
                 type: object
               conditions:

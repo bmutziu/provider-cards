@@ -3,7 +3,7 @@
 PROJECT_NAME := provider-cards
 PROJECT_REPO := github.com/aaronme/$(PROJECT_NAME)
 
-PLATFORMS ?= linux_amd64 linux_arm64
+PLATFORMS ?= linux_amd64 linux_arm64 darwin_arm64
 -include build/makelib/common.mk
 
 # Setup Output
@@ -67,7 +67,7 @@ go.cachedir:
 run: go.build
 	@$(INFO) Running Crossplane locally out-of-cluster . . .
 	@# To see other arguments that can be provided, run the command with --help instead
-	$(GO_OUT_DIR)/$(PROJECT_NAME) --debug
+	$(GO_OUT_DIR)/provider --debug
 
 dev: $(KIND) $(KUBECTL)
 	@$(INFO) Creating kind cluster

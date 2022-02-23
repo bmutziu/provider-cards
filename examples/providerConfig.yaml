@@ -5,6 +5,7 @@ metadata:
   name: example-provider-secret
 type: Opaque
 data:
+  {}
   # credentials: BASE64ENCODED_PROVIDER_CREDS
 ---
 apiVersion: providercards.aaroneaton.com/v1alpha1

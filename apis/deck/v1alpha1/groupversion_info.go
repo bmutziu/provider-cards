@@ -14,10 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha1 contains the v1alpha1 group Sample resources of the Template provider.
-// +kubebuilder:object:generate=true
-// +groupName=providercards.aaroneaton.com
-// +versionName=v1alpha1
+// Package v1alpha1 contains API Schema definitions for the providercards.aaroneaton.com v1alpha1 API group
+//+kubebuilder:object:generate=true
+//+groupName=providercards.aaroneaton.com
 package v1alpha1
 
 import (

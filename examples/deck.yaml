@@ -1,0 +1,8 @@
+apiVersion: providercards.aaroneaton.com/v1alpha1
+kind: Deck
+metadata:
+  name: example
+spec:
+  forProvider: {}
+  providerConfigRef:
+    name: example
