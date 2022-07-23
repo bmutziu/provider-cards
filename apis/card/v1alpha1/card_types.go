@@ -26,17 +26,13 @@ import (
 )
 
 // CardParameters are the configurable fields of a Card.
-type CardParameters struct {
-	// +crossplane:generate:reference:type=github.com/aaronme/provider-cards/apis/deck/v1alpha1.Deck
-	// +crossplane:generate:reference:refFieldName=DeckRef
-	// +crossplane:generate:reference:selectorFieldName=DeckSelector
-	Deck string `json:"deck"`
-}
+type CardParameters struct{}
 
 // CardObservation are the observable fields of a Card.
 type CardObservation struct {
 	Suit string `json:"suit,omitempty"`
 	Rank string `json:"rank,omitempty"`
+	Face string `json:"face,omitempty"`
 }
 
 // A CardSpec defines the desired state of a Card.

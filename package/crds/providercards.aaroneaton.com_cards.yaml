@@ -61,11 +61,6 @@ spec:
                 type: string
               forProvider:
                 description: CardParameters are the configurable fields of a Card.
-                properties:
-                  deck:
-                    type: string
-                required:
-                - deck
                 type: object
               providerConfigRef:
                 default:
@@ -117,6 +112,8 @@ spec:
               atProvider:
                 description: CardObservation are the observable fields of a Card.
                 properties:
+                  face:
+                    type: string
                   rank:
                     type: string
                   suit:

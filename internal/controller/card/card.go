@@ -18,7 +18,9 @@ package card
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"math/rand"
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -27,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
@@ -34,7 +37,6 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
 	"github.com/aaronme/provider-cards/apis/card/v1alpha1"
-	deckv1alpha1 "github.com/aaronme/provider-cards/apis/deck/v1alpha1"
 	apisv1alpha1 "github.com/aaronme/provider-cards/apis/v1alpha1"
 )
 
@@ -50,9 +52,100 @@ const (
 // A NoOpService does nothing.
 type NoOpService struct{}
 
+type cardCredentials struct {
+	Seed int64 `json:"seed"`
+}
+
+type deck struct {
+	Cards       []v1alpha1.Card
+	Credentials []byte
+}
+
 var (
 	newNoOpService = func(_ []byte) (interface{}, error) { return &NoOpService{}, nil }
+	decks          = make(map[string]deck)
 )
+
+// In a non-demo provider, we would be querying an API that held our state.
+// For this demonstration, we are holding the deck in memory. Therefore,
+// creation and state management must take place within our Observe method.
+func deckClient(name string, creds []byte) error {
+	suits := [4]string{"♠", "♥", "♦", "♣"}
+	ranks := [13]string{"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}
+
+	d := deck{}
+
+	if _, ok := decks[name]; ok {
+		d = decks[name]
+	}
+
+	// If the deck has cards, we're done
+	if len(d.Cards) != 0 {
+		return nil
+	}
+
+	// If there are no cards, instantiate a new deck using the Credentials Seed
+	cc := cardCredentials{}
+	err := json.Unmarshal(creds, &cc)
+
+	if err != nil {
+		return err
+	}
+
+	cards := []v1alpha1.Card{}
+	for _, suit := range suits {
+		for _, rank := range ranks {
+			newCard := v1alpha1.Card{
+				Status: v1alpha1.CardStatus{
+					AtProvider: v1alpha1.CardObservation{
+						Suit: suit,
+						Rank: rank,
+						Face: suit + rank,
+					},
+				},
+			}
+			cards = append(cards, newCard)
+		}
+	}
+
+	rand.Seed(cc.Seed)
+	for i := range cards {
+		j := rand.Intn(i + 1) //nolint:golint,gosec
+		cards[i], cards[j] = cards[j], cards[i]
+	}
+
+	d.Cards = cards
+	decks[name] = d
+
+	return nil
+}
+
+// cardClient verifies the card is valid
+func cardClient(face string, deckName string) error {
+	// Because we store the deck in-memory, we can lose the state on a container
+	// restart. Because of this, we double-check that this card is _not_ in the
+	// deck. If found, we remove it.
+	deckCards := decks[deckName].Cards
+	newCards := []v1alpha1.Card{}
+
+	if len(deckCards) == 0 {
+		return errors.New("no cards found")
+	}
+
+	for _, card := range deckCards {
+		if card.Status.AtProvider.Face != face {
+			newCards = append(newCards, card)
+		}
+	}
+
+	d := deck{
+		Cards: newCards,
+	}
+
+	decks[deckName] = d
+
+	return nil
+}
 
 // Setup adds a controller that reconciles Card managed resources.
 func Setup(mgr ctrl.Manager, l logging.Logger, rl workqueue.RateLimiter) error {
@@ -117,6 +210,11 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, errors.Wrap(err, errNewClient)
 	}
 
+	err = deckClient(pc.Name, data)
+	if err != nil {
+		return nil, errors.Wrap(err, errNewClient)
+	}
+
 	return &external{service: svc}, nil
 }
 
@@ -134,12 +232,20 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		return managed.ExternalObservation{}, errors.New(errNotCard)
 	}
 
-	// These fmt statements should be removed in the real implementation.
-	fmt.Printf("Observing: **********\n")
-	fmt.Printf("Suit: %s\n", cr.Status.AtProvider.Suit)
-	fmt.Printf("Rank: %s\n", cr.Status.AtProvider.Rank)
-	fmt.Printf("End Observation: **********\n")
+	// If there is no Face defined, we have observed a card that needs to be
+	// created (dealt).
+	if cr.Status.AtProvider.Face == "" {
+		return managed.ExternalObservation{ResourceExists: false}, nil
+	}
 
+	// If we have a Face defined, we want to confirm it is a valid card
+	deckName := cr.GetProviderConfigReference().Name
+	err := cardClient(cr.Status.AtProvider.Face, deckName)
+	if err != nil {
+		return managed.ExternalObservation{}, err
+	}
+
+	cr.SetConditions(xpv1.Available())
 	return managed.ExternalObservation{
 		// Return false when the external resource does not exist. This lets
 		// the managed resource reconciler know that it needs to call Create to
@@ -163,21 +269,24 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalCreation{}, errors.New(errNotCard)
 	}
 
-	deck := deckv1alpha1.Deck{}
-	err := c.client.Get(ctx, &deck).Name(cr.Spec.ForProvider.Deck)
+	fmt.Printf("Dealing Card: %+v\n", cr)
+	deckName := cr.GetProviderConfigReference().Name
+	thisDeck := decks[deckName]
 
-	if err != nil {
-		return managed.ExternalCreation{}, errors.New(errNotCard)
-	}
+	// Remove the top card from the deck and truncate deck.
+	cr.Status.AtProvider = thisDeck.Cards[0].Status.AtProvider // Copy first card.
+	thisDeck.Cards = thisDeck.Cards[1:]                        // Truncate deck.
+	decks[deckName] = thisDeck                                 // Put deck back.
 
-	cr.Status.AtProvider = getTopCard(deck)
-
-	fmt.Printf("Creating: %+v", cr)
+	fmt.Printf("Dealt card from: %s\n", deckName)
+	fmt.Printf("Deck now has %d cards\n", len(decks[deckName].Cards))
 
 	return managed.ExternalCreation{
 		// Optionally return any details that may be required to connect to the
 		// external resource. These will be stored as the connection secret.
-		ConnectionDetails: managed.ConnectionDetails{},
+		ConnectionDetails: managed.ConnectionDetails{
+			"Face": []byte(cr.Status.AtProvider.Face),
+		},
 	}, nil
 }
 
@@ -204,25 +313,19 @@ func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
 
 	fmt.Printf("Deleting: %+v", cr)
 
+	disCard := v1alpha1.Card{
+		Status: v1alpha1.CardStatus{
+			AtProvider: cr.Status.AtProvider,
+		},
+	}
+
+	cr.Status.AtProvider = v1alpha1.CardObservation{}
+
+	deckName := cr.Spec.ProviderConfigReference.Name
+	disCards := append(decks[deckName].Cards, disCard)
+	disDeck := deck{Cards: disCards}
+
+	decks[deckName] = disDeck
+
 	return nil
-}
-
-// TODO(@AaronME)
-// need to pass deck pointer
-func getTopCard(deck deckv1alpha1.Deck) v1alpha1.CardObservation {
-	cardObservation := v1alpha1.CardStatus.CardObservation{}
-
-	// Capture all the cards in the Deck
-	allCards := deck.Status.AtProvider.Cards
-
-	// Pop the "top" card (the last card in the list)
-	topCard := allCards[len(allCards)-1]
-
-	// Put the rest of the cards back in the deck
-	deck.Status.AtProvider.Cards = allCards[:len(allCards)-1]
-
-	cardObservation.Suit = topCard.Suit
-	cardObservation.Suit = topCard.Rank
-
-	return cardObservation
 }

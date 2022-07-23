@@ -21,7 +21,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	cardv1alpha1 "github.com/aaronme/provider-cards/apis/card/v1alpha1"
-	deckv1alpha1 "github.com/aaronme/provider-cards/apis/deck/v1alpha1"
 	apisv1alpha "github.com/aaronme/provider-cards/apis/v1alpha1"
 )
 
@@ -30,7 +29,6 @@ func init() {
 	AddToSchemes = append(AddToSchemes,
 		apisv1alpha.SchemeBuilder.AddToScheme,
 		cardv1alpha1.SchemeBuilder.AddToScheme,
-		deckv1alpha1.SchemeBuilder.AddToScheme,
 	)
 }
 

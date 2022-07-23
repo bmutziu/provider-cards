@@ -1,10 +1,32 @@
 apiVersion: providercards.aaroneaton.com/v1alpha1
 kind: Card
 metadata:
-  name: example
+  name: example-one
 spec:
-  forProvider:
-    suit: "♥"
-    rank: "12"
+  forProvider: {}
+  #   suit: "♥"
+  #   rank: "A"
   providerConfigRef:
     name: example
+---
+apiVersion: providercards.aaroneaton.com/v1alpha1
+kind: Card
+metadata:
+  name: example-two
+spec:
+  forProvider: {}
+  #   suit: "♥"
+  #   rank: "2"
+  providerConfigRef:
+    name: example
+---
+apiVersion: providercards.aaroneaton.com/v1alpha1
+kind: Card
+metadata:
+  name: example-three
+spec:
+  forProvider: {}
+  #   suit: "♥"
+  #   rank: "10"
+  providerConfigRef:
+    name: example2

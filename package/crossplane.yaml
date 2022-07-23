@@ -5,9 +5,8 @@ metadata:
   annotations:
     meta.crossplane.io/maintainer: Aaron Eaton <mr@aaroneaton.com>
     meta.crossplane.io/source: github.com/aaronme/provider-cards
-    meta.crossplane.io/license: Apache-2.0
     meta.crossplane.io/description: |
-      A template that can be used to create Crossplane providers.
+      A provider for playing cards from A Tour of Crossplane at aaroneaton.com.
 spec:
   controller:
-    image: DOCKER_REGISTRY/provider-cards-controller:VERSION
+    image: us-docker.pkg.dev/aaroneaton/tour/provider-cards-controller:v0.0.1

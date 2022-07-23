@@ -4,9 +4,9 @@ metadata:
   namespace: crossplane-system
   name: example-provider-secret
 type: Opaque
-data:
-  {}
-  # credentials: BASE64ENCODED_PROVIDER_CREDS
+stringData:
+  credentials: |
+    { "seed": 1 }
 ---
 apiVersion: providercards.aaroneaton.com/v1alpha1
 kind: ProviderConfig
@@ -18,4 +18,26 @@ spec:
     secretRef:
       namespace: crossplane-system
       name: example-provider-secret
+      key: credentials
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: crossplane-system
+  name: example2-provider-secret
+type: Opaque
+stringData:
+  credentials: |
+    { "seed": 2 }
+---
+apiVersion: providercards.aaroneaton.com/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: example2
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: example2-provider-secret
       key: credentials
