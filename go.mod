@@ -1,4 +1,4 @@
-module github.com/crossplane/provider-template
+module github.com/aaronme/provider-cards
 
 go 1.16
 
