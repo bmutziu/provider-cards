@@ -20,8 +20,8 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	cardv1alpha1 "github.com/aaronme/provider-cards/apis/card/v1alpha1"
-	apisv1alpha "github.com/aaronme/provider-cards/apis/v1alpha1"
+	cardv1alpha1 "github.com/bmutziu/provider-cards/apis/card/v1alpha1"
+	apisv1alpha "github.com/bmutziu/provider-cards/apis/v1alpha1"
 )
 
 func init() {

@@ -36,8 +36,8 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	"github.com/aaronme/provider-cards/apis/card/v1alpha1"
-	apisv1alpha1 "github.com/aaronme/provider-cards/apis/v1alpha1"
+	"github.com/bmutziu/provider-cards/apis/card/v1alpha1"
+	apisv1alpha1 "github.com/bmutziu/provider-cards/apis/v1alpha1"
 )
 
 const (
@@ -87,7 +87,6 @@ func deckClient(name string, creds []byte) error {
 	// If there are no cards, instantiate a new deck using the Credentials Seed
 	cc := cardCredentials{}
 	err := json.Unmarshal(creds, &cc)
-
 	if err != nil {
 		return err
 	}
@@ -160,7 +159,8 @@ func Setup(mgr ctrl.Manager, l logging.Logger, rl workqueue.RateLimiter) error {
 		managed.WithExternalConnecter(&connector{
 			kube:         mgr.GetClient(),
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
-			newServiceFn: newNoOpService}),
+			newServiceFn: newNoOpService,
+		}),
 		managed.WithLogger(l.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))))
 
