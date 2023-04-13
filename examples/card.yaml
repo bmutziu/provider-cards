@@ -1,4 +1,4 @@
-apiVersion: providercards.aaroneaton.com/v1alpha1
+apiVersion: providercards.bmutziu.me/v1alpha1
 kind: Card
 metadata:
   name: example-one
@@ -9,7 +9,7 @@ spec:
   providerConfigRef:
     name: example
 ---
-apiVersion: providercards.aaroneaton.com/v1alpha1
+apiVersion: providercards.bmutziu.me/v1alpha1
 kind: Card
 metadata:
   name: example-two
@@ -20,7 +20,7 @@ spec:
   providerConfigRef:
     name: example
 ---
-apiVersion: providercards.aaroneaton.com/v1alpha1
+apiVersion: providercards.bmutziu.me/v1alpha1
 kind: Card
 metadata:
   name: example-three

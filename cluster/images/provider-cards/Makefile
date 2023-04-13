@@ -8,7 +8,7 @@ include ../../../build/makelib/common.mk
 #  Options
 DOCKER_REGISTRY ?= crossplane
 IMAGE = $(BUILD_REGISTRY)/provider-cards-$(ARCH)
-OSBASEIMAGE = scratch
+OSBASEIMAGE = arm64v8/alpine:3.13
 include ../../../build/makelib/image.mk
 
 # ====================================================================================
@@ -22,7 +22,9 @@ img.build:
 	@cd $(IMAGE_TEMP_DIR) && $(SED_CMD) 's|VERSION|$(VERSION)|g' package/crossplane.yaml || $(FAIL)
 	@cd $(IMAGE_TEMP_DIR) && $(SED_CMD) 's|DOCKER_REGISTRY|$(DOCKER_REGISTRY)|g' package/crossplane.yaml || $(FAIL)
 	@cd $(IMAGE_TEMP_DIR) && find package -type f -name '*.yaml' -exec cat {} >> 'package.yaml' \; -exec printf '\n---\n' \; || $(FAIL)
+	@$(INFO) Here they are for the cards $(BUILD_ARGS) $(HOSTOS) $(OS) $(ARCH) $(TINI_VERSION)
 	@docker build $(BUILD_ARGS) \
+		--build-arg DOCKER_PLATFORM=$(HOSTOS)/$(ARCH) \
 		--build-arg ARCH=$(ARCH) \
 		--build-arg TINI_VERSION=$(TINI_VERSION) \
 		-t $(IMAGE) \

@@ -22,8 +22,8 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
-	card "github.com/aaronme/provider-cards/internal/controller/card"
-	"github.com/aaronme/provider-cards/internal/controller/config"
+	card "github.com/bmutziu/provider-cards/internal/controller/card"
+	"github.com/bmutziu/provider-cards/internal/controller/config"
 )
 
 // Setup creates all Template controllers with the supplied logger and adds them to

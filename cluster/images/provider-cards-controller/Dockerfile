@@ -8,4 +8,4 @@ ADD provider /usr/local/bin/crossplane-template-provider
 
 EXPOSE 8080
 USER 1001
-ENTRYPOINT ["crossplane-template-provider"]
+ENTRYPOINT ["crossplane-template-provider", "--debug"]

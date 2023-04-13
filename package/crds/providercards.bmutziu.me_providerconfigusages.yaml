@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.2
   creationTimestamp: null
-  name: providerconfigusages.providercards.aaroneaton.com
+  name: providerconfigusages.providercards.bmutziu.me
 spec:
-  group: providercards.aaroneaton.com
+  group: providercards.bmutziu.me
   names:
     categories:
     - crossplane

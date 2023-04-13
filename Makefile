@@ -1,9 +1,9 @@
 # ====================================================================================
 # Setup Project
 PROJECT_NAME := provider-cards
-PROJECT_REPO := github.com/aaronme/$(PROJECT_NAME)
+PROJECT_REPO := github.com/bmutziu/$(PROJECT_NAME)
 
-PLATFORMS ?= linux_amd64 linux_arm64 darwin_arm64
+PLATFORMS ?= linux_amd64 linux_arm64
 -include build/makelib/common.mk
 
 # Setup Output
@@ -22,7 +22,7 @@ GO111MODULE = on
 -include build/makelib/k8s_tools.mk
 
 # Setup Images
-DOCKER_REGISTRY ?= aaronme
+DOCKER_REGISTRY ?= bmutziu
 IMAGES = $(PROJECT_NAME) $(PROJECT_NAME)-controller
 -include build/makelib/image.mk
 

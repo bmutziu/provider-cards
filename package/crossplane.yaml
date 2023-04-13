@@ -3,10 +3,10 @@ kind: Provider
 metadata:
   name: provider-cards
   annotations:
-    meta.crossplane.io/maintainer: Aaron Eaton <mr@aaroneaton.com>
-    meta.crossplane.io/source: github.com/aaronme/provider-cards
+    meta.crossplane.io/maintainer: Bogdan Muțiu <bmutziu@bmutziu.me>
+    meta.crossplane.io/source: github.com/bmutziu/provider-cards
     meta.crossplane.io/description: |
-      A provider for playing cards from A Tour of Crossplane at aaroneaton.com.
+      A provider for playing cards from A Tour of Crossplane at bmutziu.me.
 spec:
   controller:
-    image: us-docker.pkg.dev/aaroneaton/tour/provider-cards-controller:v0.0.1
+    image: docker.io/bmutziu/provider-cards-controller-arm64:master

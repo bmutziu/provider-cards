@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.2
   creationTimestamp: null
-  name: providerconfigs.providercards.aaroneaton.com
+  name: providerconfigs.providercards.bmutziu.me
 spec:
-  group: providercards.aaroneaton.com
+  group: providercards.bmutziu.me
   names:
     kind: ProviderConfig
     listKind: ProviderConfigList

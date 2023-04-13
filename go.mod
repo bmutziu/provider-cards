@@ -1,4 +1,4 @@
-module github.com/aaronme/provider-cards
+module github.com/bmutziu/provider-cards
 
 go 1.16
 

@@ -15,8 +15,10 @@ include ../../../build/makelib/image.mk
 img.build:
 	@$(INFO) docker build $(IMAGE)
 	@cp Dockerfile $(IMAGE_TEMP_DIR) || $(FAIL)
+	@ls -lacrtR $(OUTPUT_DIR)/bin
 	@cp $(OUTPUT_DIR)/bin/$(OS)_$(ARCH)/provider $(IMAGE_TEMP_DIR) || $(FAIL)
 	@cd $(IMAGE_TEMP_DIR) && $(SED_CMD) 's|BASEIMAGE|$(OSBASEIMAGE)|g' Dockerfile || $(FAIL)
+	@$(INFO) Here they are for the controller $(BUILD_ARGS) $(OS) $(ARCH) $(TINI_VERSION) $(IMAGE)
 	@docker build $(BUILD_ARGS) \
 		--build-arg ARCH=$(ARCH) \
 		--build-arg TINI_VERSION=$(TINI_VERSION) \
